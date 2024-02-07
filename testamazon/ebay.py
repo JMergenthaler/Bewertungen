@@ -50,7 +50,13 @@ lock = Lock()
 
 def ebay(url):
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(
+            #proxy={
+            #    "server": "proxy.scrapeops.io:5353",
+            #    "username": "scrapeops",
+            #    "password": "2fe431bf-9f9f-4ef9-ba02-dfe257fbaa93",
+            #}
+        )
 
         context = browser.new_context(ignore_https_errors=True)
         page = context.new_page()
