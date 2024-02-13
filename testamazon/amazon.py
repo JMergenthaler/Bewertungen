@@ -2,18 +2,43 @@ import re
 from testamazon.spiders.amazon import AmazonReviewsSpider
 from scrapy.crawler import CrawlerProcess
 import os
+from mariadb_use import datenbank_test
+from translate import Translate
+from test_mariadb import mariadb_add
+from bertaus import auswertung
 os.environ['SCRAPY_SETTINGS_MODULE'] = 'testamazon.settings'
 from scrapy.utils.project import get_project_settings
 
 
-def call_spider(link):
-    asin = get_asin_ref(link)
-    settings = get_project_settings()
-    process = CrawlerProcess(settings)
-
-    process.crawl(AmazonReviewsSpider, asin=asin)
-    process.start()
+def amazon_bewertung(url):
+    asin, neu = call_spider(url)
+    if asin:
+        if neu[0]:
+            Translate()
+            bewertung = auswertung()
+            mariadb_add("amazon", asin, bewertung)
+        
+        
+        # TOBI FRAGEN!!!!
     
+
+        else:
+            
+            bewertung = neu[1]
+
+
+def call_spider(link):
+    neu = None
+    asin = get_asin_ref(link)
+    if asin != None:
+        neu = datenbank_test("amazon",asin)
+        isneu = not neu[0]
+        if isneu:
+            settings = get_project_settings()
+            process = CrawlerProcess(settings)
+            process.crawl(AmazonReviewsSpider, asin=asin)
+            process.start()
+    return asin, neu
 
 
 
