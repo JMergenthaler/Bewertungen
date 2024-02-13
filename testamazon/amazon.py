@@ -16,7 +16,8 @@ def amazon_bewertung(url):
         if neu[0]:
             Translate()
             bewertung = auswertung()
-            mariadb_add("amazon", asin, bewertung)
+            fake = bewertung['fake']
+            mariadb_add("amazon", asin, fake)
         
         
         # TOBI FRAGEN!!!!
