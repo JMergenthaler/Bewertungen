@@ -7,19 +7,38 @@ from amazon import call_spider
 from ebay import ebay
 from testamazon.spiders.trustpilot import TrustpilotSpider
 import json
+from test_mariadb import mariadb_add
+from translate import Translate
+from mariadb_ueberpruefen import datenbank_test
+from bertaus import auswertung
 os.environ['SCRAPY_SETTINGS_MODULE'] = 'testamazon.settings'
 from scrapy.utils.project import get_project_settings
 
 # save this as app.py
 
 
-def run_spider_trust(link):
+def run_trust_spider(link):
     settings = get_project_settings()
     process = CrawlerProcess(settings)
 
     process.crawl(TrustpilotSpider, start_url=link)
     process.start()
 
+def run_spider_trust(link):
+    neu = datenbank_test(link, "")
+    isneu = not neu[0]
+    if isneu:
+        run_spider_trust(link)
+        Translate()
+        bewertung = auswertung()
+        mariadb_add(link, "",bewertung['fake'])
+        
+        #Tobi
+    else:
+        # Tobi
+        pass
+
+        
 
 def read_file():
     directory = "testamazon\\json\\"
