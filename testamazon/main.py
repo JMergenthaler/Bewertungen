@@ -3,19 +3,21 @@ from scrapy import signals
 import os
 import scrapy
 from scrapy.crawler import CrawlerProcess
-from amazon import call_spider
-from ebay import ebay
+from amazon import amazon_bewertung
+from new_ebay import ebay
 from testamazon.spiders.trustpilot import TrustpilotSpider
 import json
 from test_mariadb import mariadb_add
 from translate import Translate
 from mariadb_ueberpruefen import datenbank_test
 from bertaus import auswertung
+from tobi import zurueck
+from lidl import lidl
+
 os.environ['SCRAPY_SETTINGS_MODULE'] = 'testamazon.settings'
 from scrapy.utils.project import get_project_settings
 
 # save this as app.py
-
 
 def run_trust_spider(link):
     settings = get_project_settings()
@@ -28,15 +30,14 @@ def run_spider_trust(link):
     neu = datenbank_test(link, "")
     isneu = not neu[0]
     if isneu:
-        run_spider_trust(link)
+        run_trust_spider(link)
         Translate()
         bewertung = auswertung()
-        mariadb_add(link, "",bewertung['fake'])
+        mariadb_add(link, "",bewertung['Fake'])
         
-        #Tobi
+        zurueck()
     else:
-        # Tobi
-        pass
+        zurueck()
 
         
 
@@ -67,12 +68,14 @@ def read_file():
                     match2 = re.search(regex_trust, result)
                     regex_ebay = r"ebay" 
                     match3 = re.search(regex_ebay, result)
+                    regex_lidl = r'lidl'
+                    match4 = re.search(regex_lidl, result)
                     if match:
                         result = match.group()
                         print(result)
                         print(url)
                         print("______")
-                        call_spider(url)
+                        amazon_bewertung(url)
                         #nextstep()
                     elif match2:
                         result = match2.group()
@@ -85,9 +88,15 @@ def read_file():
                         print(result)
                         print("______")
                         ebay(url)
+                    elif match4:
+                        result = match4.group()
+                        print(result)
+                        print("-------")
+                        lidl(url)
                     else:
                         print("Nicht Supportet")
                 else:
                     print("No match found.")
 
-read_file()
+if __name__ == "__main__":
+    read_file()

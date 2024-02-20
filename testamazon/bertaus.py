@@ -2,22 +2,24 @@ import tensorflow as tf
 from transformers import BertTokenizer
 import json
 
-# Path to the directory where the saved model is
-model_path = './savemodel/'
+def load_model():
+    model_path = 'testamazon/savemodel/'
 
-# Load the trained model from the SavedModel directory
-loaded_model = tf.saved_model.load(model_path)
+    # Load the trained model from the SavedModel directory
+    loaded_model = tf.saved_model.load(model_path)
 
-print(list(loaded_model.signatures.keys()))  # Prints the available signature keys
-signature_key = list(loaded_model.signatures.keys())[0]  # Typically 'serving_default', adjust if necessary
-print(loaded_model.signatures[signature_key].structured_outputs)
+    print(list(loaded_model.signatures.keys()))  # Prints the available signature keys
+    signature_key = list(loaded_model.signatures.keys())[0]  # Typically 'serving_default', adjust if necessary
+    print(loaded_model.signatures[signature_key].structured_outputs)
 
-# Initialize the tokenizer
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    # Initialize the tokenizer
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    return tokenizer, loaded_model
 
-def predict_review(review_text):
+def predict_review(review_text, tokenizer, loaded_model):
     # Tokenize the input text
-    inputs = tokenizer(review_text, add_special_tokens=True, padding='max_length', truncation=True, max_length=512, return_tensors='tf')
+    print(review_text)
+    inputs = tokenizer(str(review_text), add_special_tokens=True, padding='max_length', truncation=True, max_length=512, return_tensors='tf')
     
     # Prepare the inputs for the model
     input_ids = inputs['input_ids']
@@ -55,17 +57,19 @@ def predict_review(review_text):
     
 
 def auswertung():
+    tokenizer, loaded_model = load_model()
+    Path = 'testamazon/json/s/'
     fake = 0
     reviews = []
     try:
-        with open("./bert.json", "r") as f:
+        with open(Path + "bert.json", "r") as f:
             table = json.load(f)
             for element in table:
                 reviews.append(element["review"])
     except:
         print("No File")
     for review in reviews:
-        x = predict_review(review)
+        x = predict_review(review, tokenizer, loaded_model)
         fake += x['Fake']
     fake = fake / len(reviews)
     real = 1 - fake
@@ -73,6 +77,9 @@ def auswertung():
         'Fake': fake,
         'Real': real,
     }
-x = auswertung()
-print(f"Fake: {x['Fake']} Real: {x['Real']}")
     
+if __name__ == "__main__":
+    # This code block will only execute if bertaus.py is the entry point to the program,
+    # not when it is imported as a module.
+    x = auswertung()
+    print(f"Fake: {x['Fake']} Real: {x['Real']}")

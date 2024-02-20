@@ -41,7 +41,7 @@ def noproductpage(url):
         if marke != None or itemid != None:
             api_request(marke, itemid)
         else:
-            print("Not the rgight page")
+            print("Not the right page")
     else:
         print('Keine Produktbezogene Seite')
 
