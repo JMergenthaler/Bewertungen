@@ -58,18 +58,28 @@ def Translate():
         # Iterating through the json
         # list
         with open(Path + 'bert.json', 'w') as f2:
-
+            j = 0
             outputs = []
             for i in data:
-                bewertung = add_title_with_check(i)
+                bewertung = i['text']
+                trans_title = i['title']
                 bewertung = remove_emoji(bewertung)
-                if bewertung == None or bewertung == "":
+                trans_title = remove_emoji(trans_title)
+                if trans_title == None or trans_title == "" or trans_title == " ":
                    continue
+                if len(outputs) <= 6 and j + 7 > len(data):
+                   if bewertung == None:
+                      continue
+                   if len(bewertung) <= 50:
+                      continue
+                print(bewertung)
                 if detect(bewertung) != 'en':
                     review = GoogleTranslator(source='auto', target='en').translate(bewertung)
+                    trans_title = GoogleTranslator(source='auto', target='en').translate(trans_title)
                 else:
                     review = bewertung
-                outputs.append({"review": review})
+                outputs.append({"text": review, "rating":i['rating'], "title": trans_title})
+                j += 1
             json.dump(outputs, f2)
         f2.close()
     f.close()
