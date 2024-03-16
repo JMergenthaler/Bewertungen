@@ -16,8 +16,7 @@ import os
 async def booking(url, filename):
     land,pagename,label,srpvid = get_pagename_label_srpvid(url)
     neu = datenbank_test('booking', pagename)
-    isneu = not neu[0]
-    if isneu:
+    if not neu:
         delete_file(filename)
         await play_async_get_reviews(pagename,land,label,srpvid,filename, 0)
         Translate()
@@ -143,7 +142,7 @@ async def play_async_get_reviews(pagename, land,url_label, srpvid, filepath, off
                 for label_selector in labels_selector:
                     label = await label_selector.get_property('textContent')
                 for rev in revs:
-                    if (await rev.get_property('textContent')) != "":
+                    if (await rev.get_property('textContent')) != "" and (await rev.get_property('textContent')) != " ":
                         rev_text = await rev.text_content()  # Extract text content
                 get_text.update({label: rev_text})
 
@@ -177,6 +176,6 @@ async def play_async_get_reviews(pagename, land,url_label, srpvid, filepath, off
 
 
 if __name__ == "__main__":
-    #asyncio.run(booking('https://www.booking.com/hotel/it/romance-al-colosseo.de.html?aid=304142&label=gen173nr-1FCAEoggI46AdIM1gEaDuIAQGYAQe4ARfIAQzYAQHoAQH4AQuIAgGoAgO4ApHKrK8GwAIB0gIkNTAzNjUxYmQtYzdmYi00YTRmLTkzN2EtMWEyMDMzZGMwMDc32AIG4AIB&sid=3c1855f678f51917147b6ec76cbf7faa&dest_id=1232235;dest_type=hotel;dist=0;group_adults=2;group_children=0;hapos=1;hpos=1;nflt=ht_id%3D201%3Bht_id%3D213%3Bht_id%3D219%3Bht_id%3D220%3Bht_id%3D228%3Bht_id%3D229%3Bht_id%3D230%3Bht_id%3D232%3Bht_id%3D208%3Bht_id%3D209%3Bht_id%3D210%3Bht_id%3D212%3Bht_id%3D214%3Bht_id%3D215%3Bht_id%3D216%3Bht_id%3D222%3Bht_id%3D223%3Bht_id%3D224%3Bht_id%3D227;no_rooms=1;req_adults=2;req_children=0;room1=A%2CA;sb_price_type=total;sr_order=popularity;srepoch=1709980835;srpvid=2c454b0c740d0195;type=total;ucfs=1&#hotelTmpl','./testamazon/json/s/review.json'))
-    test('./testamazon/json/s/end.json')
+    asyncio.run(booking('https://www.booking.com/hotel/it/romance-al-colosseo.de.html?aid=304142&label=gen173nr-1FCAEoggI46AdIM1gEaDuIAQGYAQe4ARfIAQzYAQHoAQH4AQuIAgGoAgO4ApHKrK8GwAIB0gIkNTAzNjUxYmQtYzdmYi00YTRmLTkzN2EtMWEyMDMzZGMwMDc32AIG4AIB&sid=3c1855f678f51917147b6ec76cbf7faa&dest_id=1232235;dest_type=hotel;dist=0;group_adults=2;group_children=0;hapos=1;hpos=1;nflt=ht_id%3D201%3Bht_id%3D213%3Bht_id%3D219%3Bht_id%3D220%3Bht_id%3D228%3Bht_id%3D229%3Bht_id%3D230%3Bht_id%3D232%3Bht_id%3D208%3Bht_id%3D209%3Bht_id%3D210%3Bht_id%3D212%3Bht_id%3D214%3Bht_id%3D215%3Bht_id%3D216%3Bht_id%3D222%3Bht_id%3D223%3Bht_id%3D224%3Bht_id%3D227;no_rooms=1;req_adults=2;req_children=0;room1=A%2CA;sb_price_type=total;sr_order=popularity;srepoch=1709980835;srpvid=2c454b0c740d0195;type=total;ucfs=1&#hotelTmpl','./testamazon/json/s/review.json'))
+    #test('./testamazon/json/s/end.json')
     #asyncio.run(test2())

@@ -13,6 +13,9 @@ from mariadb_ueberpruefen import datenbank_test
 from bertaus import auswertung
 from tobi import zurueck
 from lidl import lidl
+from thomann import thomann
+from otto import otto
+from nike import nike
 
 os.environ['SCRAPY_SETTINGS_MODULE'] = 'testamazon.settings'
 from scrapy.utils.project import get_project_settings
@@ -28,8 +31,7 @@ def run_trust_spider(link):
 
 def run_spider_trust(link):
     neu = datenbank_test(link, "")
-    isneu = not neu[0]
-    if isneu:
+    if not neu:
         run_trust_spider(link)
         Translate()
         bewertung = auswertung()
@@ -70,6 +72,12 @@ def read_file():
                     match3 = re.search(regex_ebay, result)
                     regex_lidl = r'lidl'
                     match4 = re.search(regex_lidl, result)
+                    regex_thomann = r'thomann'
+                    match5 = re.search(regex_thomann, result)
+                    regex_otto = r'otto'
+                    match6 = re.search(regex_otto, result)
+                    regex_nike = r'nike'
+                    match7 = re.search(regex_nike, result)
                     if match:
                         result = match.group()
                         print(result)
@@ -93,6 +101,22 @@ def read_file():
                         print(result)
                         print("-------")
                         lidl(url)
+                    elif match5:
+                        result = match5.group()
+                        print(result)
+                        print("-------")
+                        thomann(url, './testamazon/json/s/review.json')
+                    elif match6:
+                        result = match6.group()
+                        print(result)
+                        print("-------")
+                        otto(url, './testamazon/json/s/review.json')
+                    elif match7:
+                        result = match7.group()
+                        print(result)
+                        print("-------")
+                        nike(url, './testamazon/json/s/')
+                        
                     else:
                         print("Nicht Supportet")
                 else:

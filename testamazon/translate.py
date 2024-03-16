@@ -72,6 +72,8 @@ def Translate():
                       continue
                    if len(bewertung) <= 50:
                       continue
+                if bewertung == None or len(bewertung) <= 1:
+                   continue
                 print(bewertung)
                 if detect(bewertung) != 'en':
                     review = GoogleTranslator(source='auto', target='en').translate(bewertung)

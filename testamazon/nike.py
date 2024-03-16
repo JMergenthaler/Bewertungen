@@ -41,16 +41,14 @@ def get_reviews(itemid,filepath):
         except:
             print("Wrong page")
 
-def nike(url, filename):
+def nike(url, filepath):
     itemid = get_itemid(url)
     neu = datenbank_test("nike", itemid)
-    isneu = not neu[0]
-    if isneu:
-        get_reviews(itemid, filename)
+    if not neu:
+        get_reviews(itemid, filepath)
         Translate()
-        bewertung = auswertung()
-        fake = bewertung['Fake']
-        mariadb_add("nike", itemid, fake)
+        auswertung()
+        mariadb_add("nike", itemid)
         zurueck()
     else:
         zurueck()

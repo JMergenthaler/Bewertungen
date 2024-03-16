@@ -39,15 +39,22 @@ def Translate_Ebay():
     with open(Path + 'bert.json', 'w') as f2:
 
         outputs = []
+        j = 0
         for i in data:
-            item = remove_emoji(i['review'])
+            item = remove_emoji(i['text'])
             if item == None or item == "":
                 continue
+            if len(outputs) <= 6 and j + 7 > len(data):
+                   if item == None:
+                      continue
+                   if len(item) <= 50:
+                      continue
             if detect(item) != 'en':
                 review = GoogleTranslator(source='auto', target='en').translate(item)
             else:
                 review = item
-            outputs.append({"review": review})
+            outputs.append({"text": review, "rating":i['rating']})
+            j += 1
         json.dump(outputs, f2)
     f2.close()
     f.close()

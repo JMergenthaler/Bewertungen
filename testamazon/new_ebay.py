@@ -29,7 +29,8 @@ def api_request(review_url):
             for x in input_dict['modules']['FEEDBACK_SUMMARY_V2']['feedbackView']['feedbackCards']:
                 #rating.append(x['feedbackInfo']['rating']['name'])
                 text = x['feedbackInfo']['comment']['accessibilityText']
-                outputs.append({"review": text.strip()})
+                rating = x['feedbackInfo']['rating']['name']
+                outputs.append({"text": text.strip(), 'rating':rating})
             with open(Path + "review.json", "w") as f:
                 json.dump(outputs, f)
         except:
@@ -104,44 +105,38 @@ def itemid(url):
             marke = match.group(1)
             itemid = match.group(2)
             neu = datenbank_test("ebay", itemid)
-            isneu = not neu[0]
-            if isneu:
+            if not neu:
                 first_api_request(marke,itemid)
                 Translate_Ebay()
                 bewertung = auswertung()
-                fake = bewertung['Fake']
-                mariadb_add("ebay", itemid, fake)
-                return fake
+                mariadb_add("ebay", itemid)
+                return
             else:
-                return neu[1]
+                return neu
         elif match2 != None:
             marke = match2.group(1)
             if marke != None:
                 neu = datenbank_test("ebay", marke)
-                isneu = not neu[0]
-                if isneu:
+                if not neu:
                     second_api_request(marke)
                     Translate_Ebay()
                     bewertung = auswertung()
-                    fake = bewertung['Fake']
-                    mariadb_add("ebay", marke, fake)
-                    return fake
+                    mariadb_add("ebay", marke)
+                    return
                 else:
-                    return neu[1]
+                    return neu
     elif match2 != None:
         marke = match2.group(1)
         if marke != None:
             neu = datenbank_test("ebay", marke)
-            isneu = not neu[0]
-            if isneu:
+            if not neu:
                 second_api_request(marke)
                 Translate_Ebay()
                 bewertung = auswertung()
-                fake = bewertung['Fake']
-                mariadb_add("ebay", marke, fake)
-                return fake
+                mariadb_add("ebay", marke)
+                return
             else:
-                return neu[1]
+                return neu
     return produkt
 
 def produkt(url):
@@ -149,22 +144,20 @@ def produkt(url):
     if match:
         itemid = match.group(1)
         neu = datenbank_test("ebay", itemid)
-        isneu = not neu[0]
-        if isneu:
+        if not neu:
             ebay_pro()
             Translate_Ebay()
             bewertung = auswertung()
-            fake = bewertung['Fake']
-            mariadb_add("ebay", itemid, fake)
-            return fake
+            mariadb_add("ebay", itemid)
+            return
         else:
-            return neu[1]
+            return neu
     return None
 
 
 def ebay(url):
-    fake = itemid(url)
-    if fake != None:
+    neu = itemid(url)
+    if neu:
         zurueck()
 
 if __name__ == "__main__":

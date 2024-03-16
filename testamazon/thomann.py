@@ -58,7 +58,7 @@ def bewertung_page(itemid, page_number, filename):
                 title = review_title.get_text(strip=True)
             for review_div in review_divs:
                 review = review_div.get_text(strip=True)
-            reviews.append({'title': title, 'stars': stars, "text": review})
+            reviews.append({'title': title, 'rating': stars, "text": review})
 
         try:
             with open(filename, 'r', encoding='utf-8') as f:
@@ -78,21 +78,20 @@ def delete_file(file_path):
     if os.path.isfile(file_path):
         os.remove(file_path)
 
-def thomann(url, filepath):
-    delete_file(filepath)
+def thomann(url, filename):
+    delete_file(filename)
     itemid = get_itemid(url)
     neu = datenbank_test("thomann" ,itemid)
-    isneu = not neu[0]
-    if isneu:
-        bewertung_page(itemid, 1, filepath)
+    if not neu:
+        bewertung_page(itemid, 1, filename)
         Translate()
-        bewertung = auswertung()
-        fake = bewertung['Fake']
-        mariadb_add("thomann", itemid, fake)
+        auswertung()
+        mariadb_add("thomann", itemid)
         zurueck()
     else:
         zurueck()
 
 if __name__ == "__main__":
-    delete_file('./testamazon/json/s/review.json')
-    bewertung_page(467180, 1 ,'./testamazon/json/s/review.json')
+    #delete_file('./testamazon/json/s/review.json')
+    thomann('https://www.thomann.de/de/denon_dj_sc_live_4.htm', './testamazon/json/s/review.json')
+    #bewertung_page(467180, 1 ,'./testamazon/json/s/review.json')

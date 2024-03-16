@@ -89,13 +89,11 @@ def otto(url, filepath):
     delete_file(filepath)
     itemid = ref_get_itemid(url)
     neu = datenbank_test("otto" ,itemid)
-    isneu = not neu[0]
-    if isneu:
+    if not neu:
         get_reviews(itemid, 1, filepath)
         Translate()
-        bewertung = auswertung()
-        fake = bewertung['Fake']
-        mariadb_add("otto", itemid, fake)
+        auswertung()
+        mariadb_add("otto", itemid)
         zurueck()
     else:
         zurueck()

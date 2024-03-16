@@ -14,14 +14,12 @@ from scrapy.utils.project import get_project_settings
 def amazon_bewertung(url):
     asin, neu = call_spider(url)
     if asin:
-        if not neu[0]:
+        if not neu:
             Translate()
             bewertung = auswertung()
             mariadb_add("amazon", asin, bewertung)
             zurueck()
         else:
-            
-            bewertung = neu[1]
             zurueck()
 
 
@@ -31,8 +29,7 @@ def call_spider(link):
     asin = get_asin_ref(link)
     if asin != None:
         neu = datenbank_test("amazon",asin)
-        isneu = not neu[0]
-        if isneu:
+        if not neu:
             settings = get_project_settings()
             process = CrawlerProcess(settings)
             process.crawl(AmazonReviewsSpider, asin=asin)

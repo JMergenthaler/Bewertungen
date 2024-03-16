@@ -1,6 +1,23 @@
 import tensorflow as tf
 from transformers import BertTokenizer
 import json
+import numpy as np
+
+
+def add_title_with_check(i):
+    try:
+        title = i['title']
+        text = i['text']
+        if text != None:
+            if not text.startswith(title):
+                bewertung = f"{title} {text}"
+            else:
+                bewertung = text
+            return bewertung
+        else:
+            return title
+    except:
+      return i['text']
 
 def load_model():
     model_path = 'testamazon/savemodel/'
@@ -54,32 +71,41 @@ def predict_review(review_text, tokenizer, loaded_model):
 
 
 # Test the function with a new review
-    
+def convert_to_float(obj):
+    if isinstance(obj, np.float32):
+        return float(obj)
+    return obj
 
 def auswertung():
     tokenizer, loaded_model = load_model()
     Path = 'testamazon/json/s/'
     fake = 0
-    reviews = []
     try:
         with open(Path + "bert.json", "r") as f:
+            
+            output = []
             table = json.load(f)
             for element in table:
-                reviews.append(element["review"])
-    except:
-        print("No File")
-    for review in reviews:
-        x = predict_review(review, tokenizer, loaded_model)
-        fake += x['Fake']
-    fake = fake / len(reviews)
-    real = 1 - fake
-    return {
-        'Fake': fake,
-        'Real': real,
-    }
-    
+                ergebnis = predict_review(add_title_with_check(element), tokenizer, loaded_model)
+                fake = ergebnis['Fake']
+                element['fake'] = fake
+                output.append(element)
+                print(element)
+            output.sort(key=get_fake)
+            
+            for out in output:
+                out['fake'] = convert_to_float(out['fake'])
+                out['real'] = 1 - out['fake']
+            with open(Path + 'end.json', 'w') as f2:
+                json.dump(output[:10], f2)
+            
+    except Exception as e:
+        print(e)
+
+def get_fake(list):
+    return list["fake"]
+
 if __name__ == "__main__":
     # This code block will only execute if bertaus.py is the entry point to the program,
     # not when it is imported as a module.
-    x = auswertung()
-    print(f"Fake: {x['Fake']} Real: {x['Real']}")
+    auswertung()

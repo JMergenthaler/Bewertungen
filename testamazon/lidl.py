@@ -15,16 +15,14 @@ def get_itemid(url):
             return match.group(1)
     return None
 
-def lidl(url):
+def lidl(url, filepath):
     itemid = get_itemid(url)
     neu = datenbank_test("lidl", itemid)
-    isneu = not neu[0]
-    if isneu:
-        lidlanfrage(itemid)
+    if not neu:
+        lidlanfrage(itemid, filepath)
         Translate_Ebay()
-        bewertung = auswertung()
-        fake = bewertung['Fake']
-        mariadb_add("lidl", itemid, fake)
+        auswertung()
+        mariadb_add("lidl", itemid)
         zurueck()
     else:
         zurueck()
@@ -33,8 +31,7 @@ def lidl(url):
 
 
         
-def lidlanfrage(itemid):
-    Path = './testamazon/json/s/'
+def lidlanfrage(itemid, filepath):
     response = requests.get(f"https://www.lidl.de/u/api/product/{itemid}/DE/de?start=1&max=100&order=STARS_DESC")
     if response.status_code == 200:
 
@@ -46,11 +43,11 @@ def lidlanfrage(itemid):
             for line in input_dict['ratings']['pageItems']:
                 reviewtext = line['reviewText']
                 stars = line['stars']
-                outputs.append({"stars": stars, "review": reviewtext})
-            with open(Path + "review.json", "w") as f:
+                outputs.append({"rating": stars, "text": reviewtext})
+            with open(filepath + "review.json", "w") as f:
                 json.dump(outputs, f)
         except:
             print("Keine Json file")
 
 if __name__ == "__main__":
-    lidl("https://www.lidl.de/p/livarno-home-polsterauflage-hochlehner-ca-120-x-50-x-8-cm/p100342500")
+    lidl("https://www.lidl.de/p/livarno-home-polsterauflage-hochlehner-ca-120-x-50-x-8-cm/p100342500", './testamazon/json/s/')
