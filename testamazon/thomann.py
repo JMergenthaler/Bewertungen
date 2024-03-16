@@ -32,7 +32,7 @@ def get_itemid(url):
 
 
 
-def bewertung_page(itemid, page_number, filename):
+def bewertung_page(itemid, page_number, filepath):
     if page_number > 10:
         return
     page_url = f"https://www.thomann.de/de/prod_ajaxGetMoreUserReviews.html?order=latest&page={page_number}&rating=0&reviewlang%5B%5D=all&ar={itemid}"
@@ -61,37 +61,37 @@ def bewertung_page(itemid, page_number, filename):
             reviews.append({'title': title, 'rating': stars, "text": review})
 
         try:
-            with open(filename, 'r', encoding='utf-8') as f:
+            with open(filepath + 'review.json', 'r', encoding='utf-8') as f:
                 existing_reviews = json.load(f)
                 reviews.extend(existing_reviews)  # Add to existing data
         except FileNotFoundError:  
             pass  # Ignore if the file doesn't exist yet
 
         # Save all reviews 
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filepath + 'review.json', 'w', encoding='utf-8') as f:
              json.dump(reviews, f, ensure_ascii=False, indent=4)
 
         if len(divs) > 0:
-            bewertung_page(itemid, page_number+1, filename)
+            bewertung_page(itemid, page_number+1, filepath)
 
 def delete_file(file_path):
-    if os.path.isfile(file_path):
-        os.remove(file_path)
+    if os.path.isfile(file_path + 'review.json'):
+        os.remove(file_path + 'review.json')
 
-def thomann(url, filename):
-    delete_file(filename)
+def thomann(url, filepath, configpath):
+    delete_file(filepath)
     itemid = get_itemid(url)
-    neu = datenbank_test("thomann" ,itemid)
+    neu = datenbank_test("thomann" ,itemid, filepath, configpath)
     if not neu:
-        bewertung_page(itemid, 1, filename)
-        Translate()
+        bewertung_page(itemid, 1, filepath)
+        Translate(filepath)
         auswertung()
-        mariadb_add("thomann", itemid)
+        mariadb_add("thomann", itemid, filepath, configpath)
         zurueck()
     else:
         zurueck()
 
 if __name__ == "__main__":
     #delete_file('./testamazon/json/s/review.json')
-    thomann('https://www.thomann.de/de/denon_dj_sc_live_4.htm', './testamazon/json/s/review.json')
+    thomann('https://www.thomann.de/de/denon_dj_sc_live_4.htm', './testamazon/json/s/', './testamazon/')
     #bewertung_page(467180, 1 ,'./testamazon/json/s/review.json')

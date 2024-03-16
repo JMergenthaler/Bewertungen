@@ -41,18 +41,18 @@ def get_reviews(itemid,filepath):
         except:
             print("Wrong page")
 
-def nike(url, filepath):
+def nike(url, filepath, configpath):
     itemid = get_itemid(url)
-    neu = datenbank_test("nike", itemid)
+    neu = datenbank_test("nike", itemid, filepath, configpath)
     if not neu:
         get_reviews(itemid, filepath)
-        Translate()
+        Translate(filepath)
         auswertung()
-        mariadb_add("nike", itemid)
+        mariadb_add("nike", itemid, filepath,configpath)
         zurueck()
     else:
         zurueck()
 
 if __name__ == "__main__":
-    print(get_itemid('https://www.nike.com/de/t/go-flyease-schuhe-fur-einfaches-an-und-ausziehen-nfbRvV/DR5540-102'))
-    #nike('https://www.nike.com/de/t/mercurial-superfly-9-academy-high-top-fussballschuh-fur-verschiedene-boden-HhlDp2/DJ5625-700', './testamazon/json/s/')
+    #print(get_itemid('https://www.nike.com/de/t/go-flyease-schuhe-fur-einfaches-an-und-ausziehen-nfbRvV/DR5540-102'))
+    nike('https://www.nike.com/de/t/mercurial-superfly-9-academy-high-top-fussballschuh-fur-verschiedene-boden-HhlDp2/DJ5625-700', './testamazon/json/s/', './testamazon/')

@@ -32,7 +32,7 @@ def pro_get_itemid(url):
     return None
     
 
-def get_reviews(itemid, page_number, filename):
+def get_reviews(itemid, page_number, filepath):
     if page_number > 10:
         return
     headers = {
@@ -62,41 +62,41 @@ def get_reviews(itemid, page_number, filename):
                 text = text_span.get_text(strip=True)
             for title_h4 in titles_h4:
                 title = title_h4.get_text(strip=True)
-            reviews.append({'title':title, 'stars': stars,'text': text})
+            reviews.append({'title':title, 'rating': stars,'text': text})
         try:
-            with open(filename, 'r', encoding='utf-8') as f:
+            with open(filepath + 'review.json', 'r', encoding='utf-8') as f:
                 existing_reviews = json.load(f)
                 reviews.extend(existing_reviews)  # Add to existing data
         except FileNotFoundError:  
             pass  # Ignore if the file doesn't exist yet
 
         # Save all reviews 
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filepath + 'review.json', 'w', encoding='utf-8') as f:
              json.dump(reviews, f, ensure_ascii=False, indent=4)
         maxpage_buttons = soup.select('.p_btn50--3rd.cr_paging__button.cr_js_paging__button.cr_paging__button--last.cr_js_paging__button--last')
         maxpage = 1
         for maxpage_button in maxpage_buttons:
             maxpage = int(maxpage_button['data-target'])
         if page_number < maxpage:
-            get_reviews(itemid, page_number+1, filename)
+            get_reviews(itemid, page_number+1, filepath)
 
         
 def delete_file(file_path):
-    if os.path.isfile(file_path):
-        os.remove(file_path)
+    if os.path.isfile(file_path + 'review.json'):
+        os.remove(file_path + 'review.json')
 
-def otto(url, filepath):
+def otto(url, filepath, configpath):
     delete_file(filepath)
     itemid = ref_get_itemid(url)
-    neu = datenbank_test("otto" ,itemid)
+    neu = datenbank_test("otto" ,itemid, filepath, configpath)
     if not neu:
         get_reviews(itemid, 1, filepath)
-        Translate()
+        Translate(filepath)
         auswertung()
-        mariadb_add("otto", itemid)
+        mariadb_add("otto", itemid, filepath, configpath)
         zurueck()
     else:
         zurueck()
 
 if __name__ == "__main__":
-    otto('https://www.otto.de/p/jack-jones-t-shirt-kompo-tee-538986060/#variationId=1410962871','./testamazon/json/s/review.json')
+    otto('https://www.otto.de/p/jack-jones-t-shirt-kompo-tee-538986060/#variationId=1410962871','./testamazon/json/s/', './testamazon/')

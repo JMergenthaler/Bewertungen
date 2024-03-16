@@ -15,14 +15,14 @@ def get_itemid(url):
             return match.group(1)
     return None
 
-def lidl(url, filepath):
+def lidl(url, filepath, conifgpath):
     itemid = get_itemid(url)
-    neu = datenbank_test("lidl", itemid)
+    neu = datenbank_test("lidl", itemid, filepath, conifgpath)
     if not neu:
         lidlanfrage(itemid, filepath)
-        Translate_Ebay()
+        Translate_Ebay(filepath)
         auswertung()
-        mariadb_add("lidl", itemid)
+        mariadb_add("lidl", itemid, filepath, conifgpath)
         zurueck()
     else:
         zurueck()
@@ -50,4 +50,4 @@ def lidlanfrage(itemid, filepath):
             print("Keine Json file")
 
 if __name__ == "__main__":
-    lidl("https://www.lidl.de/p/livarno-home-polsterauflage-hochlehner-ca-120-x-50-x-8-cm/p100342500", './testamazon/json/s/')
+    lidl("https://www.lidl.de/p/livarno-home-polsterauflage-hochlehner-ca-120-x-50-x-8-cm/p100342500", './testamazon/json/s/', './testamazon/')

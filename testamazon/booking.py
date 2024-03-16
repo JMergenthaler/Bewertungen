@@ -13,23 +13,22 @@ from tobi import zurueck
 import asyncio
 import os
 
-async def booking(url, filename):
+async def booking(url, filepath, configpath):
     land,pagename,label,srpvid = get_pagename_label_srpvid(url)
-    neu = datenbank_test('booking', pagename)
+    neu = datenbank_test('booking', pagename, filepath, configpath)
     if not neu:
-        delete_file(filename)
-        await play_async_get_reviews(pagename,land,label,srpvid,filename, 0)
-        Translate()
-        bewertung = auswertung()
-        fake = bewertung['Fake']
-        mariadb_add('booking', pagename, fake)
+        delete_file(filepath)
+        await play_async_get_reviews(pagename,land,label,srpvid,filepath, 0)
+        Translate(filepath)
+        auswertung()
+        mariadb_add('booking', pagename, filepath, configpath)
         zurueck()
     else:
         zurueck()
 
 def delete_file(file_path):
-    if os.path.isfile(file_path):
-        os.remove(file_path)
+    if os.path.isfile(file_path + 'review.json'):
+        os.remove(file_path + 'review.json')
 
 def get_pagename_label_srpvid(url):
     regex = r'\/\/www\.booking\.com\/\w+\/(\w+)\/([\w-]*)\..*label=([\w-]+).*srpvid=([\w-]+)'
@@ -81,13 +80,13 @@ async def play_get_reviews(pagename, url_label, srpvid, filepath, offset):
             reviews.append({'title': title, 'rating': rating, 'text': text})
         browser.close()
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath + 'review.json', 'r', encoding='utf-8') as f:
                 existing_reviews = json.load(f)
                 reviews.extend(existing_reviews)  # Add to existing data
         except FileNotFoundError:  
             pass  # Ignore if the file doesn't exist yet
 
-        with open(filepath, "w") as f:
+        with open(filepath + 'review.json', "w") as f:
             json.dump(reviews, f)
         
         offset += 25
@@ -95,7 +94,7 @@ async def play_get_reviews(pagename, url_label, srpvid, filepath, offset):
             await play_get_reviews(pagename, url_label, srpvid, filepath,offset)
 
 def test(filename):
-    with open(filename, 'r', encoding='utf-8') as f:
+    with open(filename + 'review.json', 'r', encoding='utf-8') as f:
         existing_reviews = json.load(f)
         print(len(existing_reviews))
 
@@ -161,13 +160,13 @@ async def play_async_get_reviews(pagename, land,url_label, srpvid, filepath, off
         await browser.close()
 
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath + 'review.json', 'r', encoding='utf-8') as f:
             existing_reviews = json.load(f)
             reviews.extend(existing_reviews)  # Add to existing data
     except FileNotFoundError:  
         pass  # Ignore if the file doesn't exist yet
 
-    with open(filepath, "w") as f:
+    with open(filepath + 'review.json', "w") as f:
         json.dump(reviews, f)
     
     offset += 25
@@ -176,6 +175,6 @@ async def play_async_get_reviews(pagename, land,url_label, srpvid, filepath, off
 
 
 if __name__ == "__main__":
-    asyncio.run(booking('https://www.booking.com/hotel/it/romance-al-colosseo.de.html?aid=304142&label=gen173nr-1FCAEoggI46AdIM1gEaDuIAQGYAQe4ARfIAQzYAQHoAQH4AQuIAgGoAgO4ApHKrK8GwAIB0gIkNTAzNjUxYmQtYzdmYi00YTRmLTkzN2EtMWEyMDMzZGMwMDc32AIG4AIB&sid=3c1855f678f51917147b6ec76cbf7faa&dest_id=1232235;dest_type=hotel;dist=0;group_adults=2;group_children=0;hapos=1;hpos=1;nflt=ht_id%3D201%3Bht_id%3D213%3Bht_id%3D219%3Bht_id%3D220%3Bht_id%3D228%3Bht_id%3D229%3Bht_id%3D230%3Bht_id%3D232%3Bht_id%3D208%3Bht_id%3D209%3Bht_id%3D210%3Bht_id%3D212%3Bht_id%3D214%3Bht_id%3D215%3Bht_id%3D216%3Bht_id%3D222%3Bht_id%3D223%3Bht_id%3D224%3Bht_id%3D227;no_rooms=1;req_adults=2;req_children=0;room1=A%2CA;sb_price_type=total;sr_order=popularity;srepoch=1709980835;srpvid=2c454b0c740d0195;type=total;ucfs=1&#hotelTmpl','./testamazon/json/s/review.json'))
+    asyncio.run(booking('https://www.booking.com/hotel/it/romance-al-colosseo.de.html?aid=304142&label=gen173nr-1FCAEoggI46AdIM1gEaDuIAQGYAQe4ARfIAQzYAQHoAQH4AQuIAgGoAgO4ApHKrK8GwAIB0gIkNTAzNjUxYmQtYzdmYi00YTRmLTkzN2EtMWEyMDMzZGMwMDc32AIG4AIB&sid=3c1855f678f51917147b6ec76cbf7faa&dest_id=1232235;dest_type=hotel;dist=0;group_adults=2;group_children=0;hapos=1;hpos=1;nflt=ht_id%3D201%3Bht_id%3D213%3Bht_id%3D219%3Bht_id%3D220%3Bht_id%3D228%3Bht_id%3D229%3Bht_id%3D230%3Bht_id%3D232%3Bht_id%3D208%3Bht_id%3D209%3Bht_id%3D210%3Bht_id%3D212%3Bht_id%3D214%3Bht_id%3D215%3Bht_id%3D216%3Bht_id%3D222%3Bht_id%3D223%3Bht_id%3D224%3Bht_id%3D227;no_rooms=1;req_adults=2;req_children=0;room1=A%2CA;sb_price_type=total;sr_order=popularity;srepoch=1709980835;srpvid=2c454b0c740d0195;type=total;ucfs=1&#hotelTmpl','./testamazon/json/s/', './testamazon/'))
     #test('./testamazon/json/s/end.json')
     #asyncio.run(test2())

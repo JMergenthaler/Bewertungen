@@ -34,7 +34,7 @@ def get_itemid(url):
             if match:
                 return match.group(1)
 
-def get_reviews(itemid,limit,offset, filename, url):
+def get_reviews(itemid,limit,offset, filepath, url):
     headers_dict = {
     "Accept": "*/*",
     "Accept-Encoding": "gzip, deflate, br",
@@ -66,37 +66,35 @@ def get_reviews(itemid,limit,offset, filename, url):
         if len(data['reviews']) == 0:
             return
         try:
-            with open(filename, 'r', encoding='utf-8') as f:
+            with open(filepath + 'review.json', 'r', encoding='utf-8') as f:
                 existing_reviews = json.load(f)
                 reviews.extend(existing_reviews)  # Add to existing data
         except FileNotFoundError:  
             pass  # Ignore if the file doesn't exist yet
 
         # Save all reviews 
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filepath + 'review.json', 'w', encoding='utf-8') as f:
              json.dump(reviews, f, ensure_ascii=False, indent=4)
         offset += 10
         if offset < 100:
-            get_reviews(itemid,limit, offset, filename, url)
+            get_reviews(itemid,limit, offset, filepath, url)
 
 def delete_file(file_path):
-    if os.path.isfile(file_path):
-        os.remove(file_path)
+    if os.path.isfile(file_path + 'review.json'):
+        os.remove(file_path + 'review.json')
 
-def adidas(url, filename):
+def adidas(url, filepath, configpath):
     itemid = get_itemid(url)
-    neu = datenbank_test("adidas", itemid)
-    isneu = not neu[0]
-    if isneu:
-        delete_file(filename)
-        get_reviews(itemid, 10,0, filename, url)
-        Translate()
-        bewertung = auswertung()
-        fake = bewertung['Fake']
-        mariadb_add('adidas', itemid, fake)
+    neu = datenbank_test("adidas", itemid, filepath, configpath)
+    if not neu:
+        delete_file(filepath)
+        get_reviews(itemid, 10,0, filepath, url)
+        Translate(filepath)
+        auswertung()
+        mariadb_add('adidas', itemid, filepath, configpath)
         zurueck()
     else:
         zurueck()
 
 if __name__ == "__main__":
-    adidas('https://www.adidas.de/stan-smith-lux-shoes/IF8846.html?pr=home_still_interested_rr&slot=3&rec=mt' ,'./testamazon/json/s/review.json')
+    adidas('https://www.adidas.de/stan-smith-lux-shoes/IF8846.html?pr=home_still_interested_rr&slot=3&rec=mt' ,'./testamazon/json/s/', './testamazon/')
